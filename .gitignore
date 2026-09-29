@@ -1,0 +1,26 @@
+## .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userprefs
+*.log
+TestResults/
+publish/
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Angular / Node
+node_modules/
+frontend/quiz-app/dist/
+frontend/quiz-app/.angular/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Claude
+.claude
