@@ -43,6 +43,8 @@ public class QuizAppDbContext(DbContextOptions<QuizAppDbContext> options) : DbCo
             e.Property(x => x.PasswordHash).HasColumnName("password_hash").HasMaxLength(255).IsRequired();
             e.Property(x => x.Status).HasColumnName("status").HasMaxLength(20).HasConversion<string>()
                 .HasDefaultValue(UserStatus.Active);
+            e.Property(x => x.FailedLoginCount).HasColumnName("failed_login_count").HasDefaultValue(0);
+            e.Property(x => x.LockedUntil).HasColumnName("locked_until").HasColumnType("datetime2");
             e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("datetime2")
                 .HasDefaultValueSql(utcNow);
             e.HasIndex(x => x.Username).IsUnique();

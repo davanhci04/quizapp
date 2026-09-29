@@ -38,9 +38,12 @@ Dữ liệu seed bắt buộc: `Admin`, `User`.
 | email | nvarchar(100) | NOT NULL, UNIQUE |
 | password_hash | nvarchar(255) | NOT NULL |
 | status | nvarchar(20) | NOT NULL, default `Active` |
+| failed_login_count | int | NOT NULL, default 0 |
+| locked_until | datetime2 | NULL |
 | created_at | datetime2 | NOT NULL, default UTC now |
 
 - `status` nhận: `Active`, `Inactive`, `Locked`.
+- `failed_login_count` đếm số lần sai mật khẩu liên tiếp, reset về 0 khi đăng nhập thành công. `locked_until` là thời điểm (UTC) hết khóa, NULL nếu không bị khóa.
 - `password_hash` lưu hash (BCrypt hoặc ASP.NET Identity PasswordHasher). **Không bao giờ lưu plaintext.**
 - Quy tắc khóa tài khoản: sai mật khẩu 5 lần liên tiếp → `Locked` trong 30 phút.
 
