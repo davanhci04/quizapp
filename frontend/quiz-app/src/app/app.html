@@ -1,0 +1,29 @@
+<mat-toolbar color="primary" class="toolbar">
+  <a routerLink="/" class="brand">
+    <mat-icon>quiz</mat-icon>
+    <span>Quiz App</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  @if (auth.user(); as user) {
+    <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
+      <mat-icon>account_circle</mat-icon>
+      {{ user.username }}
+      <span class="role">({{ user.role }})</span>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Đăng xuất</span>
+      </button>
+    </mat-menu>
+  } @else {
+    <a mat-button routerLink="/login">Đăng nhập</a>
+    <a mat-flat-button routerLink="/register">Đăng ký</a>
+  }
+</mat-toolbar>
+
+<main class="content">
+  <router-outlet />
+</main>

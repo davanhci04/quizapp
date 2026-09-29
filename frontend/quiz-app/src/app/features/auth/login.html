@@ -1,0 +1,50 @@
+<mat-card appearance="outlined" class="auth-card">
+  <mat-card-header>
+    <mat-card-title>Đăng nhập</mat-card-title>
+  </mat-card-header>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
+    <mat-card-content>
+      @if (error(); as message) {
+        <div class="error-banner" role="alert">{{ message }}</div>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tên đăng nhập hoặc email</mat-label>
+        <input matInput formControlName="usernameOrEmail" autocomplete="username" />
+        @if (form.controls.usernameOrEmail.hasError('required')) {
+          <mat-error>Vui lòng nhập tên đăng nhập hoặc email</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mật khẩu</mat-label>
+        <input
+          matInput
+          formControlName="password"
+          [type]="hidePassword() ? 'password' : 'text'"
+          autocomplete="current-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hidePassword.set(!hidePassword())"
+          [attr.aria-label]="hidePassword() ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'"
+        >
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.password.hasError('required')) {
+          <mat-error>Vui lòng nhập mật khẩu</mat-error>
+        }
+      </mat-form-field>
+    </mat-card-content>
+
+    <mat-card-actions class="actions">
+      <button mat-flat-button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+      </button>
+      <span>Chưa có tài khoản? <a routerLink="/register">Đăng ký</a></span>
+    </mat-card-actions>
+  </form>
+</mat-card>
