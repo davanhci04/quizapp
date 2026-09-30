@@ -1,0 +1,69 @@
+<mat-card appearance="outlined" class="summary" [class.passed]="attempt().isPassed" [class.failed]="attempt().isPassed === false">
+  <mat-card-header>
+    <mat-card-title>{{ attempt().quizTitle }}</mat-card-title>
+    <mat-card-subtitle>
+      {{ statusLabel() }}
+      @if (attempt().submittedAt) {
+        · nộp lúc {{ attempt().submittedAt | date: 'dd/MM/yyyy HH:mm' }}
+      }
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="score-row">
+      <div class="score">{{ attempt().totalScore | number: '1.0-2' }} <small>/ {{ attempt().maxScore | number: '1.0-2' }}</small></div>
+      <div class="verdict" data-testid="verdict">{{ verdict() }}</div>
+    </div>
+    <mat-progress-bar mode="determinate" [value]="percent()" />
+    <p class="meta">
+      Điểm đạt: {{ attempt().passingScore | number: '1.0-2' }} · Đúng {{ correctCount() }} / {{ attempt().questions.length }} câu
+      @if (attempt().status === 'TimedOut') {
+        · bài được tự động nộp khi hết giờ
+      }
+    </p>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <a mat-flat-button [routerLink]="['/quizzes', attempt().quizId]">Làm lại</a>
+    <a mat-button routerLink="/attempts">Lịch sử làm bài</a>
+  </mat-card-actions>
+</mat-card>
+
+<h2>Chi tiết từng câu</h2>
+
+@for (q of attempt().questions; track q.questionId; let i = $index) {
+  <mat-card appearance="outlined" class="question">
+    <mat-card-header>
+      <mat-card-subtitle class="head">
+        Câu {{ i + 1 }} · {{ q.scoreWeight | number: '1.0-2' }} điểm ·
+        @if (q.selectedAnswerId === null) {
+          <span class="tag blank">Bỏ trống</span>
+        } @else if (q.isCorrect) {
+          <span class="tag correct">Đúng</span>
+        } @else {
+          <span class="tag wrong">Sai</span>
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="content">{{ q.content }}</p>
+      <ul class="options">
+        @for (option of q.answers; track option.answerId) {
+          <li [class.correct]="option.isCorrect" [class.picked-wrong]="q.selectedAnswerId === option.answerId && !option.isCorrect">
+            @if (option.isCorrect) {
+              <mat-icon class="ok">check_circle</mat-icon>
+            } @else if (q.selectedAnswerId === option.answerId) {
+              <mat-icon class="bad">cancel</mat-icon>
+            } @else {
+              <mat-icon class="none">radio_button_unchecked</mat-icon>
+            }
+            <span>{{ option.answerText }}</span>
+            @if (q.selectedAnswerId === option.answerId) {
+              <em>(bạn chọn)</em>
+            }
+          </li>
+        }
+      </ul>
+    </mat-card-content>
+  </mat-card>
+}

@@ -1,0 +1,82 @@
+<div class="bar">
+  <h1>{{ attempt().quizTitle }}</h1>
+  <div class="clock" [class.warning]="warning()" role="timer" aria-live="off">
+    <mat-icon>timer</mat-icon>
+    <span>{{ clock() }}</span>
+  </div>
+</div>
+
+@if (submitError(); as message) {
+  <div class="error-banner" role="alert">
+    {{ message }}
+    <button mat-button type="button" (click)="submit()">Thử lại</button>
+  </div>
+}
+
+@if (remaining() <= 0) {
+  <div class="info-banner">Đã hết giờ, đang nộp bài...</div>
+}
+
+<div class="layout">
+  @if (current(); as q) {
+    <mat-card appearance="outlined" class="question">
+      <mat-card-header>
+        <mat-card-subtitle>Câu {{ index() + 1 }} / {{ total() }} · {{ q.scoreWeight }} điểm</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="content">{{ q.content }}</p>
+
+        <mat-radio-group
+          class="options"
+          [value]="selected()[q.questionId] ?? null"
+          [disabled]="locked()"
+          (change)="onRadio($event, q.questionId)"
+          [attr.aria-label]="'Đáp án câu ' + (index() + 1)"
+        >
+          @for (option of q.answers; track option.answerId) {
+            <mat-radio-button [value]="option.answerId">{{ option.answerText }}</mat-radio-button>
+          }
+        </mat-radio-group>
+      </mat-card-content>
+
+      <mat-card-actions class="nav">
+        <button mat-button type="button" (click)="go(index() - 1)" [disabled]="index() === 0">
+          <mat-icon>chevron_left</mat-icon> Câu trước
+        </button>
+        <button
+          mat-button
+          type="button"
+          (click)="choose(q.questionId, null)"
+          [disabled]="locked() || selected()[q.questionId] == null"
+        >
+          Bỏ chọn
+        </button>
+        <button mat-button type="button" (click)="go(index() + 1)" [disabled]="index() === total() - 1">
+          Câu sau <mat-icon iconPositionEnd>chevron_right</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <aside class="palette">
+    <h2>Danh sách câu</h2>
+    <div class="chips">
+      @for (question of attempt().questions; track question.questionId; let i = $index) {
+        <button
+          type="button"
+          class="chip"
+          [class.answered]="selected()[question.questionId] != null"
+          [class.current]="i === index()"
+          (click)="go(i)"
+          [attr.aria-label]="'Câu ' + (i + 1) + (selected()[question.questionId] != null ? ', đã trả lời' : ', chưa trả lời')"
+        >
+          {{ i + 1 }}
+        </button>
+      }
+    </div>
+    <p class="progress">Đã trả lời {{ answeredCount() }} / {{ total() }}</p>
+    <button mat-flat-button type="button" (click)="confirmSubmit()" [disabled]="locked()">
+      {{ submitting() ? 'Đang nộp...' : 'Nộp bài' }}
+    </button>
+  </aside>
+</div>

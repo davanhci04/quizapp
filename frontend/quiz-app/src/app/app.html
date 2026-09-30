@@ -4,6 +4,13 @@
     <span>Quiz App</span>
   </a>
 
+  <nav class="nav">
+    <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Danh sách quiz</a>
+    @if (auth.isAuthenticated()) {
+      <a mat-button routerLink="/attempts" routerLinkActive="active">Lịch sử làm bài</a>
+    }
+  </nav>
+
   <span class="spacer"></span>
 
   @if (auth.user(); as user) {

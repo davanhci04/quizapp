@@ -13,6 +13,16 @@
   font-weight: 500;
 }
 
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 24px;
+
+  .active {
+    background: color-mix(in srgb, currentColor 18%, transparent);
+  }
+}
+
 .spacer {
   flex: 1 1 auto;
 }

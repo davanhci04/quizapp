@@ -1,0 +1,46 @@
+<a mat-button routerLink="/" class="back"><mat-icon>arrow_back</mat-icon> Danh sách quiz</a>
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="40" /></div>
+} @else if (error(); as message) {
+  <div class="error-banner" role="alert">{{ message }}</div>
+} @else if (quiz(); as q) {
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{ q.title }}</mat-card-title>
+      <mat-card-subtitle>Tạo ngày {{ q.createdAt | date: 'dd/MM/yyyy' }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>{{ q.description || 'Không có mô tả.' }}</p>
+
+      <dl class="facts">
+        <div>
+          <dt><mat-icon>schedule</mat-icon> Thời gian</dt>
+          <dd>{{ q.duration }} phút</dd>
+        </div>
+        <div>
+          <dt><mat-icon>help_outline</mat-icon> Số câu hỏi</dt>
+          <dd>{{ q.questionCount }}</dd>
+        </div>
+        <div>
+          <dt><mat-icon>flag</mat-icon> Điểm đạt</dt>
+          <dd>{{ q.passingScore }} / {{ q.totalScoreWeight }}</dd>
+        </div>
+      </dl>
+
+      @if (startError(); as message) {
+        <div class="error-banner" role="alert">{{ message }}</div>
+      }
+    </mat-card-content>
+
+    <mat-card-actions class="actions">
+      <button mat-flat-button type="button" (click)="start()" [disabled]="starting()">
+        {{ starting() ? 'Đang bắt đầu...' : 'Bắt đầu làm bài' }}
+      </button>
+      @if (!auth.isAuthenticated()) {
+        <span class="hint">Bạn cần đăng nhập để làm bài.</span>
+      }
+    </mat-card-actions>
+  </mat-card>
+}

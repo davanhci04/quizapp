@@ -1,0 +1,51 @@
+<header class="page-header">
+  <h1>Danh sách quiz</h1>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+    <mat-label>Tìm theo tiêu đề</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [formControl]="search" />
+  </mat-form-field>
+</header>
+
+@if (error(); as message) {
+  <div class="error-banner" role="alert">
+    {{ message }}
+    <button mat-button type="button" (click)="reload()">Thử lại</button>
+  </div>
+}
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="40" /></div>
+} @else if (quizzes().length === 0 && !error()) {
+  <p class="empty">Không có quiz nào phù hợp.</p>
+} @else {
+  <div class="grid">
+    @for (quiz of quizzes(); track quiz.quizId) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>{{ quiz.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="description">{{ quiz.description || 'Không có mô tả.' }}</p>
+          <ul class="facts">
+            <li><mat-icon>schedule</mat-icon>{{ quiz.duration }} phút</li>
+            <li><mat-icon>help_outline</mat-icon>{{ quiz.questionCount }} câu</li>
+            <li><mat-icon>flag</mat-icon>Điểm đạt: {{ quiz.passingScore }} / {{ quiz.totalScoreWeight }}</li>
+          </ul>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-flat-button [routerLink]="['/quizzes', quiz.quizId]">Xem chi tiết</a>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex()"
+    [hidePageSize]="true"
+    [showFirstLastButtons]="true"
+    (page)="onPage($event)"
+  />
+}

@@ -1,0 +1,66 @@
+<h1>Lịch sử làm bài</h1>
+
+@if (error(); as message) {
+  <div class="error-banner" role="alert">
+    {{ message }}
+    <button mat-button type="button" (click)="load()">Thử lại</button>
+  </div>
+}
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="40" /></div>
+} @else if (items().length === 0 && !error()) {
+  <p class="empty">Bạn chưa làm bài nào. <a routerLink="/">Chọn một quiz để bắt đầu.</a></p>
+} @else {
+  <div class="table-wrap">
+    <table mat-table [dataSource]="items()">
+      <ng-container matColumnDef="quiz">
+        <th mat-header-cell *matHeaderCellDef>Quiz</th>
+        <td mat-cell *matCellDef="let row">{{ row.quizTitle }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="startedAt">
+        <th mat-header-cell *matHeaderCellDef>Bắt đầu</th>
+        <td mat-cell *matCellDef="let row">{{ row.startedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Trạng thái</th>
+        <td mat-cell *matCellDef="let row">{{ statusText(row.status) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="score">
+        <th mat-header-cell *matHeaderCellDef>Điểm</th>
+        <td mat-cell *matCellDef="let row">{{ row.totalScore === null ? '—' : (row.totalScore | number: '1.0-2') }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="result">
+        <th mat-header-cell *matHeaderCellDef>Kết quả</th>
+        <td mat-cell *matCellDef="let row">
+          <span [class.passed]="row.isPassed" [class.failed]="row.isPassed === false">{{ resultLabel(row.isPassed) }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <a mat-button [routerLink]="['/attempts', row.attemptId]">
+            {{ row.status === 'InProgress' ? 'Tiếp tục' : 'Xem kết quả' }}
+          </a>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex()"
+    [hidePageSize]="true"
+    [showFirstLastButtons]="true"
+    (page)="onPage($event)"
+  />
+}
