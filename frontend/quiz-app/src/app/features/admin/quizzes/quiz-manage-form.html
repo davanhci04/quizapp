@@ -1,0 +1,107 @@
+<a mat-button routerLink="/admin/quizzes" class="back"><mat-icon>arrow_back</mat-icon> Quản lý quiz</a>
+
+<h1>{{ isEdit() ? 'Chỉnh sửa quiz' : 'Tạo quiz' }}</h1>
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="40" /></div>
+} @else {
+  @if (error(); as message) {
+    <div class="error-banner" role="alert">{{ message }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Thông tin quiz</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Tiêu đề</mat-label>
+          <input matInput formControlName="title" maxlength="200" />
+          @if (form.controls.title.hasError('required') || form.controls.title.hasError('blank')) {
+            <mat-error>Vui lòng nhập tiêu đề</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Mô tả</mat-label>
+          <textarea matInput formControlName="description" rows="3" maxlength="500"></textarea>
+        </mat-form-field>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Thời gian làm bài (phút)</mat-label>
+            <input matInput type="number" formControlName="duration" min="1" max="1440" />
+            @if (form.controls.duration.invalid) {
+              <mat-error>Nhập số phút nguyên từ 1 đến 1440</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Điểm đạt</mat-label>
+            <input matInput type="number" formControlName="passingScore" min="0" max="999.99" step="0.5" />
+            @if (form.controls.passingScore.invalid) {
+              <mat-error>Nhập điểm từ 0 đến 999.99 (tối đa 2 chữ số thập phân)</mat-error>
+            } @else {
+              <mat-hint>Người làm đạt khi tổng điểm ≥ giá trị này</mat-hint>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (unreachable()) {
+          <div class="warn-banner">
+            <mat-icon>warning</mat-icon>
+            Điểm đạt lớn hơn tổng điểm tối đa của quiz ({{ quiz()!.totalScoreWeight | number: '1.0-2' }}), nên không ai đạt được.
+          </div>
+        }
+
+        <mat-slide-toggle formControlName="isPublic">
+          Công khai (khách chưa đăng nhập cũng thấy khi quiz được xuất bản)
+        </mat-slide-toggle>
+      </mat-card-content>
+
+      <mat-card-actions class="actions">
+        <button mat-flat-button type="submit" [disabled]="saving()">
+          {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Tạo quiz' }}
+        </button>
+        <a mat-button routerLink="/admin/quizzes">Hủy</a>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+
+  @if (quiz(); as q) {
+    <mat-card appearance="outlined" class="section">
+      <mat-card-header>
+        <mat-card-title>Trạng thái</mat-card-title>
+        <mat-card-subtitle>Chỉ quiz đã xuất bản mới cho người dùng làm bài.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (statusError(); as message) {
+          <div class="error-banner" role="alert">{{ message }}</div>
+        }
+        <div class="status-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Trạng thái</mat-label>
+            <mat-select [formControl]="statusControl">
+              @for (s of statuses; track s) {
+                <mat-option [value]="s">{{ statusText(s) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button
+            mat-flat-button
+            type="button"
+            (click)="applyStatus()"
+            [disabled]="statusSaving() || statusControl.value === q.status"
+          >
+            {{ statusSaving() ? 'Đang cập nhật...' : 'Cập nhật trạng thái' }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="section">
+      <app-quiz-questions-panel [quiz]="q" (changed)="onQuestionsChanged($event)" />
+    </div>
+  }
+}

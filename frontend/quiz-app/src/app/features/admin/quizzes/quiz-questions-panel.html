@@ -1,0 +1,100 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Câu hỏi trong quiz</mat-card-title>
+    <mat-card-subtitle>
+      {{ quiz().questions.length }} câu · tổng {{ quiz().totalScoreWeight | number: '1.0-2' }} điểm
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (error(); as message) {
+      <div class="error-banner" role="alert">{{ message }}</div>
+    }
+
+    @if (ungradableCount() > 0) {
+      <div class="warn-banner">
+        <mat-icon>warning</mat-icon>
+        {{ ungradableCount() }} câu thuộc loại chưa hỗ trợ chấm điểm nên người dùng chưa thể làm quiz này.
+      </div>
+    }
+
+    @if (quiz().questions.length === 0) {
+      <p class="empty">Quiz chưa có câu hỏi. Quiz cần ít nhất 1 câu hỏi mới xuất bản được.</p>
+    } @else {
+      <ol class="questions">
+        @for (q of quiz().questions; track q.questionId; let i = $index) {
+          <li>
+            <span class="order">{{ i + 1 }}</span>
+
+            <div class="body">
+              <span class="content">{{ q.content }}</span>
+              <small>
+                {{ typeText(q) }}
+                @if (q.category) {
+                  · {{ q.category }}
+                }
+                @if (q.questionStatus === 'Archived') {
+                  · <strong>đã archive</strong>
+                }
+                @if (!gradable(q)) {
+                  · <em>chưa hỗ trợ chấm điểm</em>
+                }
+              </small>
+            </div>
+
+            <label class="weight">
+              <span>Điểm</span>
+              <input
+                type="number"
+                min="0.01"
+                max="999.99"
+                step="0.5"
+                [value]="q.scoreWeight"
+                [disabled]="busy()"
+                (change)="onWeightChange(q, $event)"
+                [attr.aria-label]="'Điểm của câu ' + (i + 1)"
+              />
+            </label>
+
+            <button
+              mat-icon-button
+              type="button"
+              (click)="move(i, -1)"
+              [disabled]="busy() || i === 0"
+              matTooltip="Chuyển lên"
+              aria-label="Chuyển lên"
+            >
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="move(i, 1)"
+              [disabled]="busy() || i === quiz().questions.length - 1"
+              matTooltip="Chuyển xuống"
+              aria-label="Chuyển xuống"
+            >
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="remove(q)"
+              [disabled]="busy()"
+              matTooltip="Gỡ khỏi quiz"
+              aria-label="Gỡ khỏi quiz"
+            >
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          </li>
+        }
+      </ol>
+    }
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-flat-button type="button" (click)="openPicker()" [disabled]="busy()">
+      <mat-icon>add</mat-icon> Thêm câu hỏi từ ngân hàng
+    </button>
+  </mat-card-actions>
+</mat-card>

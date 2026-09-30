@@ -1,5 +1,6 @@
 import { AttemptStatus, QuestionType } from '../models/attempt.models';
 import { QuestionDifficulty, QuestionStatus } from '../models/question.models';
+import { QuizStatus } from '../models/quiz.models';
 
 export const ATTEMPT_STATUS_LABEL: Record<AttemptStatus, string> = {
   InProgress: 'Đang làm',
@@ -27,7 +28,15 @@ export const QUESTION_STATUS_LABEL: Record<QuestionStatus, string> = {
   Archived: 'Đã archive',
 };
 
-export const QUESTION_TYPES = Object.keys(QUESTION_TYPE_LABEL) as QuestionType[];
+export const QUIZ_STATUS_LABEL: Record<QuizStatus, string> = {
+  Draft: 'Nháp',
+  Published: 'Đã xuất bản',
+  Archived: 'Đã lưu trữ',
+};
+
+export const QUIZ_STATUSES = Object.keys(QUIZ_STATUS_LABEL) as QuizStatus[];
+
+export const QUESTION_TYPES =Object.keys(QUESTION_TYPE_LABEL) as QuestionType[];
 export const DIFFICULTIES = Object.keys(DIFFICULTY_LABEL) as QuestionDifficulty[];
 export const QUESTION_STATUSES = Object.keys(QUESTION_STATUS_LABEL) as QuestionStatus[];
 

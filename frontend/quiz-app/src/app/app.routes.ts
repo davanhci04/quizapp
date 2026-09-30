@@ -44,7 +44,22 @@ export const routes: Routes = [
         title: 'Sửa câu hỏi',
         loadComponent: () => import('./features/admin/questions/question-form').then((m) => m.QuestionForm),
       },
-      { path: '', pathMatch: 'full', redirectTo: 'questions' },
+      {
+        path: 'quizzes',
+        title: 'Quản lý quiz',
+        loadComponent: () => import('./features/admin/quizzes/quiz-manage-list').then((m) => m.QuizManageList),
+      },
+      {
+        path: 'quizzes/new',
+        title: 'Tạo quiz',
+        loadComponent: () => import('./features/admin/quizzes/quiz-manage-form').then((m) => m.QuizManageForm),
+      },
+      {
+        path: 'quizzes/:id/edit',
+        title: 'Chỉnh sửa quiz',
+        loadComponent: () => import('./features/admin/quizzes/quiz-manage-form').then((m) => m.QuizManageForm),
+      },
+      { path: '', pathMatch: 'full', redirectTo: 'quizzes' },
     ],
   },
   {
