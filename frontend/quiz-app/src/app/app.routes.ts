@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/auth/guards';
+import { adminGuard, authGuard, guestGuard } from './core/auth/guards';
 
 export const routes: Routes = [
   {
@@ -24,6 +24,28 @@ export const routes: Routes = [
     title: 'Bài làm',
     canActivate: [authGuard],
     loadComponent: () => import('./features/attempts/attempt-page').then((m) => m.AttemptPage),
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    children: [
+      {
+        path: 'questions',
+        title: 'Ngân hàng câu hỏi',
+        loadComponent: () => import('./features/admin/questions/question-list').then((m) => m.QuestionList),
+      },
+      {
+        path: 'questions/new',
+        title: 'Thêm câu hỏi',
+        loadComponent: () => import('./features/admin/questions/question-form').then((m) => m.QuestionForm),
+      },
+      {
+        path: 'questions/:id/edit',
+        title: 'Sửa câu hỏi',
+        loadComponent: () => import('./features/admin/questions/question-form').then((m) => m.QuestionForm),
+      },
+      { path: '', pathMatch: 'full', redirectTo: 'questions' },
+    ],
   },
   {
     path: 'login',

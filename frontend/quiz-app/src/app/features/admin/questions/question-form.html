@@ -1,0 +1,141 @@
+<a mat-button routerLink="/admin/questions" class="back"><mat-icon>arrow_back</mat-icon> Ngân hàng câu hỏi</a>
+
+<h1>{{ isEdit() ? 'Sửa câu hỏi' : 'Thêm câu hỏi' }}</h1>
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="40" /></div>
+} @else {
+  @if (quizCount() > 0) {
+    <div class="info-banner">
+      <mat-icon>info</mat-icon>
+      Câu hỏi này đang được dùng trong {{ quizCount() }} quiz. Khi lưu, bạn sẽ được yêu cầu xác nhận.
+    </div>
+  }
+
+  @if (error(); as message) {
+    <div class="error-banner" role="alert">{{ message }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <mat-card appearance="outlined">
+      <mat-card-content class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Nội dung câu hỏi</mat-label>
+          <textarea matInput formControlName="content" rows="4"></textarea>
+          @if (form.controls.content.hasError('required') || form.controls.content.hasError('blank')) {
+            <mat-error>Vui lòng nhập nội dung câu hỏi</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Loại câu hỏi</mat-label>
+            <mat-select formControlName="questionType">
+              @for (type of types; track type) {
+                <mat-option [value]="type">{{ typeText(type) }}</mat-option>
+              }
+            </mat-select>
+            @if (!gradable()) {
+              <mat-hint>Loại này chưa hỗ trợ chấm điểm: quiz chứa câu này chưa cho làm bài.</mat-hint>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Độ khó</mat-label>
+            <mat-select formControlName="difficulty">
+              <mat-option value="">Không đặt</mat-option>
+              @for (d of difficulties; track d) {
+                <mat-option [value]="d">{{ difficultyText(d) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Danh mục</mat-label>
+            <input matInput formControlName="category" />
+            @if (form.controls.category.hasError('maxlength')) {
+              <mat-error>Danh mục tối đa 100 ký tự</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="answers-card">
+      <mat-card-header>
+        <mat-card-title>Đáp án</mat-card-title>
+        <mat-card-subtitle>
+          {{ singleChoice() ? 'Chọn đúng 1 đáp án đúng.' : 'Đánh dấu một hoặc nhiều đáp án đúng.' }}
+          Tối thiểu {{ 2 }} đáp án.
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div formArrayName="answers" class="answers">
+          @for (group of answers.controls; track group; let i = $index) {
+            <div class="answer" [formGroupName]="i">
+              @if (singleChoice()) {
+                <mat-radio-button
+                  [checked]="group.controls.isCorrect.value"
+                  (change)="setCorrect(i, true)"
+                  [attr.aria-label]="'Đáp án ' + (i + 1) + ' là đáp án đúng'"
+                />
+              } @else {
+                <mat-checkbox
+                  [checked]="group.controls.isCorrect.value"
+                  (change)="setCorrect(i, $event.checked)"
+                  [attr.aria-label]="'Đáp án ' + (i + 1) + ' là đáp án đúng'"
+                />
+              }
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="text">
+                <mat-label>Đáp án {{ i + 1 }}</mat-label>
+                <input matInput formControlName="answerText" maxlength="500" />
+                @if (group.controls.answerText.invalid && group.controls.answerText.touched) {
+                  <mat-error>Vui lòng nhập nội dung đáp án</mat-error>
+                }
+              </mat-form-field>
+
+              <button mat-icon-button type="button" (click)="move(i, -1)" [disabled]="i === 0" aria-label="Chuyển lên">
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                (click)="move(i, 1)"
+                [disabled]="i === answers.length - 1"
+                aria-label="Chuyển xuống"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                (click)="removeAnswer(i)"
+                [disabled]="answers.length <= 2"
+                aria-label="Xóa đáp án"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (answers.hasError('noCorrect') && form.touched) {
+          <p class="rule-error" role="alert">Phải có ít nhất 1 đáp án đúng.</p>
+        }
+
+        <button mat-button type="button" (click)="addAnswer()" [disabled]="answers.length >= maxAnswers">
+          <mat-icon>add</mat-icon> Thêm đáp án
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="saving()">
+        {{ saving() ? 'Đang lưu...' : 'Lưu' }}
+      </button>
+      <a mat-button routerLink="/admin/questions">Hủy</a>
+    </div>
+  </form>
+}

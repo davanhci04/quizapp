@@ -9,6 +9,9 @@
     @if (auth.isAuthenticated()) {
       <a mat-button routerLink="/attempts" routerLinkActive="active">Lịch sử làm bài</a>
     }
+    @if (auth.isAdmin()) {
+      <a mat-button routerLink="/admin/questions" routerLinkActive="active">Ngân hàng câu hỏi</a>
+    }
   </nav>
 
   <span class="spacer"></span>

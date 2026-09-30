@@ -1,0 +1,132 @@
+<header class="page-header">
+  <h1>Ngân hàng câu hỏi</h1>
+  <a mat-flat-button routerLink="/admin/questions/new"><mat-icon>add</mat-icon> Thêm câu hỏi</a>
+</header>
+
+<form [formGroup]="filters" class="filters">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+    <mat-label>Tìm theo nội dung</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput formControlName="search" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Danh mục</mat-label>
+    <input matInput formControlName="category" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Loại câu hỏi</mat-label>
+    <mat-select formControlName="questionType">
+      <mat-option value="">Tất cả</mat-option>
+      @for (type of types; track type) {
+        <mat-option [value]="type">{{ typeOption(type) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Độ khó</mat-label>
+    <mat-select formControlName="difficulty">
+      <mat-option value="">Tất cả</mat-option>
+      @for (d of difficulties; track d) {
+        <mat-option [value]="d">{{ difficultyOption(d) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Trạng thái</mat-label>
+    <mat-select formControlName="status">
+      <mat-option value="">Tất cả</mat-option>
+      @for (s of statuses; track s) {
+        <mat-option [value]="s">{{ statusOption(s) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</form>
+
+@if (error(); as message) {
+  <div class="error-banner" role="alert">
+    {{ message }}
+    <button mat-button type="button" (click)="load()">Thử lại</button>
+  </div>
+}
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="40" /></div>
+} @else if (items().length === 0 && !error()) {
+  <p class="empty">Không có câu hỏi nào phù hợp.</p>
+} @else {
+  <div class="table-wrap">
+    <table mat-table [dataSource]="items()">
+      <ng-container matColumnDef="content">
+        <th mat-header-cell *matHeaderCellDef>Nội dung</th>
+        <td mat-cell *matCellDef="let row" class="content-cell">
+          <span class="content-text" [matTooltip]="row.content">{{ row.content }}</span>
+          <small>{{ row.answerCount }} đáp án · tạo {{ row.createdAt | date: 'dd/MM/yyyy' }}</small>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Loại</th>
+        <td mat-cell *matCellDef="let row">{{ typeText(row.questionType) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Danh mục</th>
+        <td mat-cell *matCellDef="let row">{{ row.category || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="difficulty">
+        <th mat-header-cell *matHeaderCellDef>Độ khó</th>
+        <td mat-cell *matCellDef="let row">{{ difficultyText(row.difficulty) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Trạng thái</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="badge" [class.archived]="row.status === 'Archived'">{{ statusText(row.status) }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="usage">
+        <th mat-header-cell *matHeaderCellDef>Số quiz</th>
+        <td mat-cell *matCellDef="let row">{{ row.quizCount }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row" class="actions">
+          <a mat-icon-button [routerLink]="['/admin/questions', row.questionId, 'edit']" matTooltip="Sửa" aria-label="Sửa câu hỏi">
+            <mat-icon>edit</mat-icon>
+          </a>
+          <button
+            mat-icon-button
+            type="button"
+            (click)="toggleArchive(row)"
+            [matTooltip]="row.status === 'Active' ? 'Archive' : 'Khôi phục'"
+            [attr.aria-label]="row.status === 'Active' ? 'Archive câu hỏi' : 'Khôi phục câu hỏi'"
+          >
+            <mat-icon>{{ row.status === 'Active' ? 'archive' : 'unarchive' }}</mat-icon>
+          </button>
+          <button mat-icon-button type="button" (click)="remove(row)" matTooltip="Xóa" aria-label="Xóa câu hỏi">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex()"
+    [hidePageSize]="true"
+    [showFirstLastButtons]="true"
+    (page)="onPage($event)"
+  />
+}

@@ -7,6 +7,16 @@ interface ProblemDetails {
   errors?: Record<string, string[]>;
 }
 
+/**
+ * Nếu API yêu cầu xác nhận (409 kèm `requiresConfirmation`, ví dụ BR-12) thì trả về nội dung cảnh báo,
+ * ngược lại trả null.
+ */
+export function confirmationMessage(error: unknown): string | null {
+  if (!(error instanceof HttpErrorResponse) || error.status !== 409) return null;
+  const body = error.error as (ProblemDetails & { requiresConfirmation?: boolean }) | null;
+  return body?.requiresConfirmation === true ? (body.detail ?? 'Bạn có chắc muốn tiếp tục?') : null;
+}
+
 /** Lấy thông báo lỗi dễ đọc từ phản hồi lỗi của API. */
 export function errorMessage(error: unknown, fallback = 'Có lỗi xảy ra, vui lòng thử lại.'): string {
   if (!(error instanceof HttpErrorResponse)) return fallback;
