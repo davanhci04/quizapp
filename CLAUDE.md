@@ -58,3 +58,5 @@ Spec đầy đủ ở `docs/SRS\_QuizApplication.pdf`, thiết kế DB ở `docs
 
 \- Frontend: `cd frontend/quiz-app \&\& npm start`
 
+\- Dữ liệu mẫu: khi chạy backend ở môi trường Development, `DevelopmentDataSeeder` tự tạo tài khoản `admin` (mật khẩu ở `Seed:AdminPassword` trong `appsettings.Development.json`) cùng 5 quiz đã xuất bản, chỉ chạy khi DB chưa có quiz nào
+

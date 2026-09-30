@@ -54,6 +54,12 @@ builder.Services.AddScoped<IAttemptService, AttemptService>();
 
 var app = builder.Build();
 
+// Dữ liệu mẫu (tài khoản admin + quiz đã xuất bản) chỉ dành cho môi trường Development.
+if (app.Environment.IsDevelopment())
+{
+    await DevelopmentDataSeeder.SeedAsync(app.Services, app.Logger);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
