@@ -154,6 +154,12 @@ public class QuizAppDbContext(DbContextOptions<QuizAppDbContext> options) : DbCo
             e.Property(x => x.Status).HasColumnName("status").HasMaxLength(20).HasConversion<string>()
                 .HasDefaultValue(AttemptStatus.InProgress);
 
+            // Mỗi user chỉ có tối đa 1 bài đang làm dở cho mỗi quiz. Ràng buộc ở DB để chặn cả
+            // trường hợp nhiều request bắt đầu bài đồng thời (code kiểm tra trước không đủ).
+            e.HasIndex(x => new { x.QuizId, x.UserId })
+                .IsUnique()
+                .HasFilter("[status] = 'InProgress'");
+
             e.HasOne(x => x.Quiz).WithMany(q => q.Attempts)
                 .HasForeignKey(x => x.QuizId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.User).WithMany(u => u.Attempts)

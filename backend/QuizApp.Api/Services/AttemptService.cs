@@ -62,7 +62,19 @@ public class AttemptService(QuizAppDbContext db) : IAttemptService
             Quiz = quiz,
         };
         db.QuizAttempts.Add(attempt);
-        await db.SaveChangesAsync();
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+        {
+            // Một request khác vừa tạo bài dở dang cho cùng quiz (bấm đúp, nhiều tab...): dùng lại bài đó.
+            db.Entry(attempt).State = EntityState.Detached;
+            var existing = await db.QuizAttempts.Include(x => x.Quiz)
+                .SingleAsync(x => x.QuizId == quizId && x.UserId == userId && x.Status == AttemptStatus.InProgress);
+            return ServiceResult<StartAttemptResult>.Ok(new StartAttemptResult(await BuildDtoAsync(existing), Created: false));
+        }
 
         return ServiceResult<StartAttemptResult>.Ok(new StartAttemptResult(await BuildDtoAsync(attempt), Created: true));
     }
@@ -150,6 +162,10 @@ public class AttemptService(QuizAppDbContext db) : IAttemptService
 
         return new PagedResult<AttemptListItemDto>(items, query.Page, query.PageSize, total);
     }
+
+    /// <summary>Lỗi trùng khóa duy nhất của SQL Server (2601: unique index, 2627: unique constraint).</summary>
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException is Microsoft.Data.SqlClient.SqlException { Number: 2601 or 2627 };
 
     private Task<QuizAttempt?> FindOwnAsync(int attemptId, int userId) =>
         db.QuizAttempts.Include(x => x.Quiz)
